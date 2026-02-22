@@ -6,7 +6,7 @@ on:
 jobs:
   explore:
     # Явное указание образа с Windows Server 2025 (содержит VS 2026)
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
 
     steps:
       - name: Checkout repository
