@@ -1,40 +1,21 @@
-name: Build Visual Studio C++ Project
+name: Debug VS 2026 Environment
 
-# Триггеры запуска: пуш в ветку main и создание пулл-реквеста
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch: # Позволяет запускать экшен вручную из интерфейса GitHub
 
 jobs:
-  build:
-    # Использование последней версии раннера Windows Server с предустановленной Visual Studio
-    runs-on: windows-latest
+  explore:
+    # Явное указание образа с Windows Server 2025 (содержит VS 2026)
+    runs-on: windows-2025
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # Официальный экшен от Microsoft для добавления MSBuild в PATH
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      # Инициализация окружения MSBuild (по умолчанию подхватит самую новую версию - VS 2026 / MSBuild 18)
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-    # Опционально: восстановление NuGet пакетов (если они используются в C++ проекте)
-    - name: Restore NuGet packages
-      run: nuget restore MyProject.sln
-
-    # Запуск сборки решения через MSBuild
-    - name: Build solution
-      # Замени MyProject.sln на точное имя твоего файла решения (или укажи относительный путь)
-      run: msbuild MyProject.sln /p:Configuration=Release /p:Platform=x64
-
-    # Сохранение скомпилированных артефактов (например, .exe или .dll файлов)
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Build-Output
-        # Укажи правильный путь к папке, куда Visual Studio складывает готовые бинарники
-        path: x64\Release\
-
-    - uses: fawazahmed0/action-debug-vscode@main
+      # Запуск сессии для ручного дебага и выкачивания файлов
+      - name: Start Debug Session
+        uses: fawazahmed0/action-debug-vscode@main
