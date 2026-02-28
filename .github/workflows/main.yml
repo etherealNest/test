@@ -17,7 +17,7 @@ jobs:
 
       - name: Download archive
         run: |
-          wget ${{ inputs.LINK }}
+          wget --progress=dot:mega ${{ inputs.link }}
           unzip *.zip
 
       - uses: fawazahmed0/action-debug-vscode@main
