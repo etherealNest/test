@@ -1,21 +1,23 @@
 name: Debug VS 2026 Environment
 
 on:
-  workflow_dispatch: # Позволяет запускать экшен вручную из интерфейса GitHub
+  workflow_dispatch:
+    inputs:
+      link:
+        description: 'Link'
+        required: true
 
 jobs:
   explore:
-    # Явное указание образа с Windows Server 2025 (содержит VS 2026)
-    runs-on: windows-2025-vs2026
+    runs-on: ubuntu-lastest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Инициализация окружения MSBuild (по умолчанию подхватит самую новую версию - VS 2026 / MSBuild 18)
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Download archive
+        run: |
+          wget ${{ inputs.LINK }}
+          unzip *.zip
 
-      # Запуск сессии для ручного дебага и выкачивания файлов
-      - name: Start Debug Session
-        uses: fawazahmed0/action-debug-vscode@main
+      - uses: fawazahmed0/action-debug-vscode@main
