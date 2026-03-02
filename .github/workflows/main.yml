@@ -1,31 +1,24 @@
-name: OrangeFox Sync 14.1
+name: OrangeFox Sync Lean
 
 on:
-  workflow_dispatch: # Ручной запуск
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout this repo
-        uses: actions/checkout@v4
-
-      - name: Maximize build space
+      - name: Maximize space # Обязательно для 14.1 (чистит ~20ГБ)
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 2048
-          swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
-          remove-codeql: 'true'
 
-      - name: Install dependencies
+      - name: Install minimal dependencies
         run: |
           sudo apt-get update
-          sudo apt apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
-            libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
-            libxml2-utils xsltproc unzip python3 rsync bc aria2
+          sudo apt-get install -y aria2 # Используется скриптом для ускорения загрузки
 
       - name: Install Repo
         run: |
@@ -34,30 +27,22 @@ jobs:
           chmod a+x ~/bin/repo
           echo "$HOME/bin" >> $GITHUB_PATH
 
-      - name: Sync OrangeFox Sources
+      - name: Sync
         run: |
-          mkdir OrangeFox
-          cd OrangeFox
+          mkdir OF && cd OF
           git clone https://gitlab.com/OrangeFox/sync.git sync --depth=1
           cd sync
-          # Используем LC_ALL=C для предотвращения ошибок кодировки Python
-          # Параметр --path указывает куда качать исходники
           export LC_ALL=C
           ./orangefox_sync.sh --branch 14.1 --path ../fox_14.1 --depth=1
 
-      - name: Cleanup before upload
+      - name: Cleanup and Upload
         run: |
-          # Удаляем папку .repo, иначе артефакт будет весить >100ГБ и выйдет за лимиты
-          # Оставляем только фактически выкачанные исходники (Working Tree)
-          rm -rf OrangeFox/fox_14.1/.repo
-
-          # Создаем архив для быстрой загрузки (опционально)
-          # tar -cf - OrangeFox/fox_14.1 | split -b 2G - fox_14.1_parts.tar.
+          rm -rf OF/fox_14.1/.repo # Удаляем гигабайты истории перед загрузкой
+          mv OF/fox_14.1 ./upload_dir
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OrangeFox-14.1-Sources-NoRepo
-          path: OrangeFox/fox_14.1/
-          retention-days: 1 # Храним 1 день для экономии места
-          compression-level: 0 # Отключаем сжатие на стороне GitHub для ускорения (папка и так огромная)
+          name: OrangeFox-14.1-Sources
+          path: upload_dir/
+          retention-days: 1
