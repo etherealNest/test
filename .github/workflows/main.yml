@@ -7,7 +7,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Maximize space # Обязательно для 14.1 (чистит ~20ГБ)
+      - name: Maximize space
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 2048
@@ -18,7 +18,7 @@ jobs:
       - name: Install minimal dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y aria2 # Используется скриптом для ускорения загрузки
+          sudo apt-get install -y aria2
 
       - name: Install Repo
         run: |
@@ -29,16 +29,22 @@ jobs:
 
       - name: Sync
         run: |
-          mkdir OF && cd OF
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          mkdir -p "$GITHUB_WORKSPACE/OF"
+          cd "$GITHUB_WORKSPACE/OF"
+          
           git clone https://gitlab.com/OrangeFox/sync.git sync --depth=1
           cd sync
+          
           export LC_ALL=C
-          ./orangefox_sync.sh --branch 14.1 --path ../fox_14.1 --depth=1
+          ./orangefox_sync.sh --branch 14.1 --path "$GITHUB_WORKSPACE/OF/fox_14.1" --depth=1
 
       - name: Cleanup and Compress
         run: |
-          rm -rf OF/fox_14.1/.repo
-          tar -czf OrangeFox-14.1-Sources.tar.gz -C OF fox_14.1
+          rm -rf "$GITHUB_WORKSPACE/OF/fox_14.1/.repo"
+          tar -czf "$GITHUB_WORKSPACE/OrangeFox-14.1-Sources.tar.gz" -C "$GITHUB_WORKSPACE/OF" fox_14.1
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
