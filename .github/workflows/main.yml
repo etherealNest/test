@@ -35,14 +35,14 @@ jobs:
           export LC_ALL=C
           ./orangefox_sync.sh --branch 14.1 --path ../fox_14.1 --depth=1
 
-      - name: Cleanup and Upload
+      - name: Cleanup and Compress
         run: |
-          rm -rf OF/fox_14.1/.repo # Удаляем гигабайты истории перед загрузкой
-          mv OF/fox_14.1 ./upload_dir
+          rm -rf OF/fox_14.1/.repo
+          tar -czf OrangeFox-14.1-Sources.tar.gz -C OF fox_14.1
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: OrangeFox-14.1-Sources
-          path: upload_dir/
+          path: OrangeFox-14.1-Sources.tar.gz
           retention-days: 1
