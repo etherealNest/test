@@ -2,7 +2,13 @@ name: OrangeFox Sync Lean
 
 on:
   workflow_dispatch:
-
+    inputs:
+      branch_fox:
+        type: choice
+        options:
+          - 12.1
+          - 14.1
+      
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -37,15 +43,15 @@ jobs:
           sed -i 's/git clone /&--depth=1 /' ./orangefox_sync.sh
           
           export LC_ALL=C
-          ./orangefox_sync.sh --branch 12.1 --path "$GITHUB_WORKSPACE/OF/fox_12.1"
+          ./orangefox_sync.sh --branch ${{ inputs.branch_fox }} --path "$GITHUB_WORKSPACE/OF/fox_${{ inputs.branch_fox }}"
 
       - name: Cleanup and Compress
         run: |
-          rm -rf "$GITHUB_WORKSPACE/OF/fox_12.1/.repo"
-          tar -czf "$GITHUB_WORKSPACE/OrangeFox-12.1-Sources.tar.gz" -C "$GITHUB_WORKSPACE/OF" fox_12.1
+          rm -rf "$GITHUB_WORKSPACE/OF/fox_${{ inputs.branch_fox }}/.repo"
+          tar -czf "$GITHUB_WORKSPACE/OrangeFox-${{ inputs.branch_fox }}-Sources.tar.gz" -C "$GITHUB_WORKSPACE/OF" fox_${{ inputs.branch_fox }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OrangeFox-12.1-Sources
-          path: OrangeFox-12.1-Sources.tar.gz
+          name: OrangeFox-${{ inputs.branch_fox }}-Sources
+          path: OrangeFox-${{ inputs.branch_fox }}-Sources.tar.gz
