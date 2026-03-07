@@ -15,11 +15,6 @@ jobs:
           remove-android: 'true'
           remove-haskell: 'true'
 
-      - name: Install minimal dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y aria2
-
       - name: Install Repo
         run: |
           mkdir -p ~/bin
@@ -37,18 +32,20 @@ jobs:
           
           git clone https://gitlab.com/OrangeFox/sync.git sync --depth=1
           cd sync
+
+          sed -i 's/repo sync;/repo sync -c --no-clone-bundle --no-tags -j$(nproc);/' ./orangefox_sync.sh
+          sed -i 's/git clone /&--depth=1 /' ./orangefox_sync.sh
           
           export LC_ALL=C
-          ./orangefox_sync.sh --branch 14.1 --path "$GITHUB_WORKSPACE/OF/fox_14.1" --depth=1
+          ./orangefox_sync.sh --branch 12.1 --path "$GITHUB_WORKSPACE/OF/fox_12.1" --depth=1
 
       - name: Cleanup and Compress
         run: |
-          rm -rf "$GITHUB_WORKSPACE/OF/fox_14.1/.repo"
-          tar -czf "$GITHUB_WORKSPACE/OrangeFox-14.1-Sources.tar.gz" -C "$GITHUB_WORKSPACE/OF" fox_14.1
+          rm -rf "$GITHUB_WORKSPACE/OF/fox_12.1/.repo"
+          tar -czf "$GITHUB_WORKSPACE/OrangeFox-12.1-Sources.tar.gz" -C "$GITHUB_WORKSPACE/OF" fox_12.1
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OrangeFox-14.1-Sources
-          path: OrangeFox-14.1-Sources.tar.gz
-          retention-days: 1
+          name: OrangeFox-12.1-Sources
+          path: OrangeFox-12.1-Sources.tar.gz
