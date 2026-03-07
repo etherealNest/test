@@ -37,7 +37,7 @@ jobs:
           sed -i 's/git clone /&--depth=1 /' ./orangefox_sync.sh
           
           export LC_ALL=C
-          ./orangefox_sync.sh --branch 12.1 --path "$GITHUB_WORKSPACE/OF/fox_12.1" --depth=1
+          ./orangefox_sync.sh --branch 12.1 --path "$GITHUB_WORKSPACE/OF/fox_12.1"
 
       - name: Cleanup and Compress
         run: |
